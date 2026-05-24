@@ -8,6 +8,25 @@ class Api::V1::AuthController < ApplicationController
     end
   end
 
+
+  def login
+    user = User.find_by(email: params[:email])
+
+    if user&.authenticate(params[:password])
+      token = Auth::JwtEncoder.call(user_id: user.id)
+
+      render json: {
+        success: true,
+        token: token
+      }, status: :ok
+    else
+      render json: {
+        success: false,
+        error: "Invalid email or password"
+      }, status: :unauthorized
+    end
+  end
+
   private
 
   def user_params
