@@ -6,7 +6,7 @@ RSpec.describe "Api::V1::Auths", type: :request do
       {
         user: {
           name: "Shiva",
-          email: "shiva@example.com",
+          email: "shivasome@example.com",
           password: "passwodr123"
         }
       }
@@ -43,7 +43,7 @@ RSpec.describe "Api::V1::Auths", type: :request do
       it "does not allow duplicate email" do
         User.create!(
           name: "Existing User",
-          email: "shiva@example.com",
+          email: "shivasome@example.com",
           password: "password123"
         )
         expect {
@@ -61,6 +61,57 @@ RSpec.describe "Api::V1::Auths", type: :request do
 
         expect(json['success']).to eq(false)
         expect(json['errors']).to include("Email can't be blank")
+      end
+    end
+  end
+
+  describe "POST /api/v1/login" do
+    let(:user) do
+      User.create!(
+        name: 'Shiva',
+        email: 'shiva1@example.com',
+        password: 'password123'
+      )
+    end
+
+    context "with valid credentials" do
+      let(:valid_params) do
+        {
+          email: 'shiva1@example.com',
+          password: 'password123'
+        }
+      end
+
+      it "returns success reponse" do
+        post "/api/v1/login", params: valid_params
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "returns jwt token" do
+        post "/api/v1/login", params: valid_params
+        json = JSON.parse(response.body)
+        expect(json['token']).to be_present
+      end
+    end
+
+    context "with invalid credentials" do
+      let(:invalid_params) do
+        {
+          email: 'shiva1@example.com',
+          password: 'wrong_password'
+        }
+      end
+
+      it "returns error response" do
+        post "/api/v1/login", params: invalid_params
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "returns error message" do
+        post "/api/v1/login", params: invalid_params
+        json = JSON.parse(response.body)
+        expect(json['success']).to eq(false)
+        expect(json['error']).to eq('Invalid email or password')
       end
     end
   end
