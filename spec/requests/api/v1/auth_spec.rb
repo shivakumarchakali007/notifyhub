@@ -115,4 +115,51 @@ RSpec.describe "Api::V1::Auths", type: :request do
       end
     end
   end
+
+
+  describe 'GET /api/v1/me' do
+  let!(:user) do
+    User.create!(
+      name: 'Shiva',
+      email: 'shivasome@example.com',
+      password: 'password123'
+    )
+  end
+
+  let(:token) do
+    Auth::JwtEncoder.call(user_id: user.id)
+  end
+
+  context 'with valid token' do
+    it 'returns current user' do
+      get '/api/v1/me', headers: {
+        'Authorization' => "Bearer #{token}"
+      }
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json['user']['email']).to eq(user.email)
+    end
+  end
+
+  context 'without token' do
+    it 'returns unauthorized status' do
+      get '/api/v1/me'
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
+  context 'with invalid token' do
+    it 'returns unauthorized status' do
+      get '/api/v1/me', headers: {
+        'Authorization' => 'Bearer invalidtoken'
+      }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+end
 end
