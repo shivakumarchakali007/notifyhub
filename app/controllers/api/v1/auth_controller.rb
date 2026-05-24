@@ -1,4 +1,8 @@
 class Api::V1::AuthController < ApplicationController
+  include Authenticatable
+
+  skip_before_action :authenticate_user!, only: [ :signup, :login ]
+
   def signup
     user = User.new(user_params)
     if user.save
@@ -25,6 +29,13 @@ class Api::V1::AuthController < ApplicationController
         error: "Invalid email or password"
       }, status: :unauthorized
     end
+  end
+
+  def me
+    render json: {
+      success: true,
+      user: current_user
+    }, status: :ok
   end
 
   private
