@@ -13,7 +13,7 @@ RSpec.describe "Api::V1::Events", type: :request do
     Auth::JwtEncoder.call(user_id: user.id)
   end
 
-  describe "POST /api/v1/event" do
+  describe "POST /api/v1/events" do
     let(:valid_params) do
       {
         event: {
@@ -28,7 +28,7 @@ RSpec.describe "Api::V1::Events", type: :request do
     context "with valid token and params" do
       it "creates an event" do
         expect {
-          post "/api/v1/event",
+          post "/api/v1/events",
           params: valid_params,
           headers: {
             "Authorization" => "Bearer #{token}"
@@ -37,7 +37,7 @@ RSpec.describe "Api::V1::Events", type: :request do
       end
 
       it "returns created status" do
-        post "/api/v1/event",
+        post "/api/v1/events",
         params: valid_params,
         headers: {
           "Authorization" => "Bearer #{token}"
@@ -46,13 +46,13 @@ RSpec.describe "Api::V1::Events", type: :request do
       end
 
       it "creates event with proper data" do
-        post '/api/v1/event',
+        post '/api/v1/events',
         params: valid_params,
         headers: {
           "Authorization" => "Bearer #{token}"
         }
         expect(Event.last.event_type).to eq("commment_created")
-        expect(Event.last.payload).to eq({ "comment_id"=>1, "post_id"=>10 })
+        expect(Event.last.payload).to eql({ "comment_id"=>"1", "post_id"=>"10" })
         expect(Event.last.user_id).to eq(user.id)
       end
     end
@@ -62,7 +62,7 @@ RSpec.describe "Api::V1::Events", type: :request do
         invalid_params = valid_params.deep_dup
         invalid_params[:event][:event_type] = nil
         expect {
-          post '/api/v1/event',
+          post '/api/v1/events',
           params: invalid_params,
           headers: {
             "Authorization" => "Bearer #{token}"
@@ -74,7 +74,7 @@ RSpec.describe "Api::V1::Events", type: :request do
       it "return unprocessable content status" do
         invalid_params = valid_params.deep_dup
         invalid_params[:event][:event_type] = nil
-        post '/api/v1/event',
+        post '/api/v1/events',
         params: invalid_params,
         headers: {
           "Authorization" => "Bearer #{token}"

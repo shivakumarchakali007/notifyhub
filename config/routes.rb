@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       post :signup, to: "auth#signup"
       post :login, to: "auth#login"
       get :me, to: "auth#me"
+      resources :events, only: [ :create ]
     end
   end
 end
