@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_24_124449) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_25_152632) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -24,6 +24,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_24_124449) do
     t.index ["user_id"], name: "index_events_on_user_id"
   end
 
+  create_table "notifications", force: :cascade do |t|
+    t.string "channel", null: false
+    t.datetime "created_at", null: false
+    t.bigint "event_id", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["event_id"], name: "index_notifications_on_event_id"
+    t.index ["status", "channel"], name: "index_notifications_on_status_and_channel"
+    t.index ["user_id", "event_id", "channel"], name: "index_notifications_on_user_id_and_event_id_and_channel", unique: true
+    t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email"
@@ -34,4 +47,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_24_124449) do
   end
 
   add_foreign_key "events", "users"
+  add_foreign_key "notifications", "events"
+  add_foreign_key "notifications", "users"
 end
