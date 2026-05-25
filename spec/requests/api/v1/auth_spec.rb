@@ -66,7 +66,7 @@ RSpec.describe "Api::V1::Auths", type: :request do
   end
 
   describe "POST /api/v1/login" do
-    let(:user) do
+    let!(:user) do
       User.create!(
         name: 'Shiva',
         email: 'shiva1@example.com',
