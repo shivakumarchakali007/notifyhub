@@ -6,10 +6,12 @@ class ProcessEventJob < ApplicationJob
 
     return unless event
 
-    Notification.create!(
+    notification = Notification.create!(
       user: event.user,
       event: event,
       channel: "in_app"
     )
+
+    Notifications::DeliveryService.call(notification: notification)
   end
 end

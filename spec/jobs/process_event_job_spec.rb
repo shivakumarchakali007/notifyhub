@@ -36,7 +36,15 @@ RSpec.describe ProcessEventJob, type: :job do
         expect(notification.user).to eq(user)
         expect(notification.event).to eq(event)
         expect(notification.channel).to eq('in_app')
-        expect(notification.status).to eq('pending')
+        expect(notification.status).to eq('delivered')
+      end
+
+      it 'delivers the notification' do
+        described_class.perform_now(event.id)
+
+        notification = Notification.last
+
+        expect(notification.status).to eq('delivered')
       end
     end
 
