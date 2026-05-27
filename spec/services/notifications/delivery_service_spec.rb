@@ -33,13 +33,23 @@ RSpec.describe Notifications::DeliveryService do
 
     context "it fails to update" do
       before do
-        allow(notification).to receive(:update!).and_raise(StandardError)
+        allow(notification)
+          .to receive(:update!)
+          .with(status: "delivered")
+          .and_raise(StandardError)
+
+        allow(notification)
+          .to receive(:update!)
+          .with(status: "failed")
+          .and_return(true)
       end
 
       it "updates the status to failed" do
-        expect {
-          described_class.call(notification: notification)
-        }.to change(notification, :status).from("pending").to("failed")
+        described_class.call(notification: notification)
+
+        expect(notification)
+          .to have_received(:update!)
+          .with(status: "failed")
       end
     end
   end
