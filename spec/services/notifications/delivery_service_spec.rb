@@ -26,9 +26,21 @@ RSpec.describe Notifications::DeliveryService do
 
   describe ".call" do
     it "updates the status to delivered" do
-      described_class.call(notification: notification)
+      expect {
+        described_class.call(notification: notification)
+      }.to change(notification, :status).from("pending").to("delivered")
+    end
 
-      expect(notification.status).to eq("delivered")
+    context "it fails to update" do
+      before do
+        allow(notification).to receive(:update!).and_raise(StandardError)
+      end
+
+      it "updates the status to failed" do
+        expect {
+          described_class.call(notification: notification)
+        }.to change(notification, :status).from("pending").to("failed")
+      end
     end
   end
 end
