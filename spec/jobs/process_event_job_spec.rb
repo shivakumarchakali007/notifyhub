@@ -61,5 +61,31 @@ RSpec.describe ProcessEventJob, type: :job do
         }.not_to raise_error
       end
     end
+
+    context "when delivery fails" do
+  let!(:failed_event) do
+    Event.create!(
+      event_type: "comment_created",
+      payload: {
+        comment_id: 1,
+        post_id: 10,
+        simulate_failure: true
+      },
+      user: user
+    )
+  end
+
+
+  it "marks notification as failed" do
+    begin
+      described_class.perform_now(failed_event.id)
+    rescue StandardError
+    end
+
+    notification = Notification.last
+
+    expect(notification.status).to eq("failed")
+  end
+end
   end
 end
