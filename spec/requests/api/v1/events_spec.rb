@@ -26,6 +26,9 @@ RSpec.describe "Api::V1::Events", type: :request do
       }
     end
     context "with valid token and params" do
+      before do
+        ActiveJob::Base.queue_adapter = :test
+      end
       it "creates an event" do
         expect {
           post "/api/v1/events",
@@ -55,6 +58,15 @@ RSpec.describe "Api::V1::Events", type: :request do
         expect(Event.last.payload).to eql({ "comment_id"=>"1", "post_id"=>"10" })
         expect(Event.last.user_id).to eq(user.id)
       end
+      it "enqueues ProcessEventJob" do
+  expect {
+    post "/api/v1/events",
+      params: valid_params,
+      headers: {
+        "Authorization" => "Bearer #{token}"
+      }
+  }.to have_enqueued_job(ProcessEventJob)
+end
     end
 
     context "with invalid_params" do
