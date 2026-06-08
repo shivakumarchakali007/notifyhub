@@ -16,6 +16,7 @@ Rails.application.routes.draw do
       post :login, to: "auth#login"
       get :me, to: "auth#me"
       resources :events, only: [ :create ]
+      resources :notifications, only: [ :index ]
     end
   end
 end
